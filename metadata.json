@@ -1,0 +1,6 @@
+{
+  "name": "Momoyo Ciledug Inventory",
+  "description": "Aplikasi manajemen inventory stok barang masuk dan keluar dengan scanner barcode HP serta cetak barcode semua barang dan export file PDF untuk Momoyo Ciledug.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

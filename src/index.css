@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  .safe-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+}
+
+/* Ergonomic touch optimization for HP Smartphone */
+html, body {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Custom sleek scrollbar for Laptop & Desktop */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.6);
+}
+
+/* Standar CSS Print untuk Label Barcode & Kertas Thermal / A4 */
+@media print {
+  /* Sembunyikan seluruh UI web standar */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  /* Tampilkan hanya wadah cetak yang ditargetkan */
+  #momoyo-direct-print-area,
+  #momoyo-direct-print-area * {
+    visibility: visible !important;
+  }
+
+  #momoyo-direct-print-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 4mm !important;
+    background: #ffffff !important;
+    display: block !important;
+  }
+
+  /* Mencegah pemotongan halaman tidak wajar */
+  .print-page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}

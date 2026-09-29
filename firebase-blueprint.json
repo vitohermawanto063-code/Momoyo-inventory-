@@ -1,0 +1,125 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Item produk inventaris toko Momoyo Ciledug",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "barcode": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 255 },
+        "category": { "type": "string", "maxLength": 64 },
+        "unit": { "type": "string", "maxLength": 32 },
+        "currentStock": { "type": "number" },
+        "minStock": { "type": "number" },
+        "costEstimate": { "type": "number" },
+        "weightPerUnitKg": { "type": "number" },
+        "location": { "type": "string", "maxLength": 128 },
+        "lastUpdated": { "type": "string", "maxLength": 64 },
+        "notes": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["id", "barcode", "name", "category", "unit", "currentStock", "minStock", "location", "lastUpdated"]
+    },
+    "StockTransaction": {
+      "title": "StockTransaction",
+      "description": "Catatan riwayat transaksi barang masuk (SJ) dan keluar (Bar/Waste)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "productId": { "type": "string", "maxLength": 128 },
+        "productName": { "type": "string", "maxLength": 255 },
+        "barcode": { "type": "string", "maxLength": 64 },
+        "type": { "type": "string", "enum": ["IN", "OUT"] },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 32 },
+        "totalWeightKg": { "type": "number" },
+        "previousStock": { "type": "number" },
+        "currentStock": { "type": "number" },
+        "date": { "type": "string", "maxLength": 64 },
+        "pic": { "type": "string", "maxLength": 128 },
+        "outReason": { "type": "string", "maxLength": 64 },
+        "referenceNo": { "type": "string", "maxLength": 64 },
+        "senderCourier": { "type": "string", "maxLength": 128 },
+        "notes": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["id", "productId", "productName", "barcode", "type", "quantity", "unit", "previousStock", "currentStock", "date", "pic"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Pengaturan sinkronisasi Google Sheets dan toko",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "spreadsheetId": { "type": "string", "maxLength": 255 },
+        "spreadsheetUrl": { "type": "string", "maxLength": 500 },
+        "lastSynced": { "type": "string", "maxLength": 64 },
+        "isPublic": { "type": "boolean" }
+      }
+    },
+    "PurchaseOrder": {
+      "title": "PurchaseOrder",
+      "description": "Data pesanan barang (PO Otomatis) Momoyo Ciledug untuk pemesanan ke Gudang Pusat via WhatsApp",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "poNumber": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 64 },
+        "supplierName": { "type": "string", "maxLength": 128 },
+        "supplierPhone": { "type": "string", "maxLength": 32 },
+        "pic": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "maxLength": 32 },
+        "totalItems": { "type": "number" },
+        "totalQty": { "type": "number" },
+        "totalEstimatedWeightKg": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 500 },
+        "sentAt": { "type": "string", "maxLength": 64 },
+        "receivedAt": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "poNumber", "date", "supplierName", "pic", "status", "totalItems", "totalQty", "createdAt"]
+    },
+    "SuratJalan": {
+      "title": "SuratJalan",
+      "description": "Dokumen arsip Surat Jalan pengiriman barang dengan berat, qty, dan foto fisik (tidak mempengaruhi stok inventaris)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "sjNumber": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 64 },
+        "senderCourier": { "type": "string", "maxLength": 128 },
+        "pic": { "type": "string", "maxLength": 128 },
+        "photoUrl": { "type": "string" },
+        "totalItems": { "type": "number" },
+        "totalQty": { "type": "number" },
+        "totalWeightKg": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "sjNumber", "date", "senderCourier", "pic", "totalItems", "totalQty", "totalWeightKg", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Koleksi data master barang inventaris Momoyo Ciledug"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "StockTransaction",
+      "description": "Koleksi log transaksi mutasi barang masuk dan keluar"
+    },
+    "/purchase_orders/{poId}": {
+      "schema": "PurchaseOrder",
+      "description": "Koleksi dokumen pesanan PO otomatis dan riwayat kirim via WhatsApp"
+    },
+    "/surat_jalan/{suratJalanId}": {
+      "schema": "SuratJalan",
+      "description": "Koleksi arsip dokumen Surat Jalan dengan berat, qty, dan foto dokumen fisik (tidak mengubah stok)"
+    },
+    "/settings/{settingId}": {
+      "schema": "StoreSettings",
+      "description": "Koleksi pengaturan toko Momoyo"
+    }
+  }
+}

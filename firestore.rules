@@ -1,0 +1,116 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['id', 'barcode', 'name', 'category', 'unit', 'currentStock', 'minStock', 'location', 'lastUpdated']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.barcode is string && data.barcode.size() <= 64 &&
+             data.name is string && data.name.size() <= 255 &&
+             data.category is string && data.category.size() <= 64 &&
+             data.unit is string && data.unit.size() <= 32 &&
+             data.currentStock is number &&
+             data.minStock is number &&
+             data.location is string && data.location.size() <= 128 &&
+             data.lastUpdated is string && data.lastUpdated.size() <= 64;
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['id', 'productId', 'productName', 'barcode', 'type', 'quantity', 'unit', 'previousStock', 'currentStock', 'date', 'pic']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.productId is string && data.productId.size() <= 128 &&
+             data.productName is string && data.productName.size() <= 255 &&
+             data.barcode is string && data.barcode.size() <= 64 &&
+             (data.type == 'IN' || data.type == 'OUT') &&
+             data.quantity is number &&
+             data.unit is string && data.unit.size() <= 32 &&
+             data.previousStock is number &&
+             data.currentStock is number &&
+             data.date is string && data.date.size() <= 64 &&
+             data.pic is string && data.pic.size() <= 128;
+    }
+
+    function isValidPO(data) {
+      return data.keys().hasAll(['id', 'poNumber', 'date', 'supplierName', 'pic', 'status', 'items', 'totalItems', 'totalQty', 'createdAt']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.poNumber is string && data.poNumber.size() <= 64 &&
+             data.date is string && data.date.size() <= 64 &&
+             data.supplierName is string && data.supplierName.size() <= 128 &&
+             data.pic is string && data.pic.size() <= 128 &&
+             data.status is string && data.status.size() <= 32 &&
+             data.items is list && data.items.size() <= 200 &&
+             data.totalItems is number &&
+             data.totalQty is number &&
+             data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    function isValidSuratJalan(data) {
+      return data.keys().hasAll(['id', 'sjNumber', 'date', 'senderCourier', 'pic', 'items', 'totalItems', 'totalQty', 'totalWeightKg', 'createdAt']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.sjNumber is string && data.sjNumber.size() <= 128 &&
+             data.date is string && data.date.size() <= 64 &&
+             data.senderCourier is string && data.senderCourier.size() <= 128 &&
+             data.pic is string && data.pic.size() <= 128 &&
+             data.items is list && data.items.size() <= 200 &&
+             data.totalItems is number &&
+             data.totalQty is number &&
+             data.totalWeightKg is number &&
+             data.createdAt is string && data.createdAt.size() <= 64 &&
+             (!('photoUrl' in data) || (data.photoUrl is string && data.photoUrl.size() <= 800000));
+    }
+
+    // Default catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Products collection for multi-device sync
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if true;
+      allow create, update: if isValidId(productId) && isValidProduct(request.resource.data);
+      allow delete: if isValidId(productId);
+    }
+
+    // Transactions log collection for multi-device sync
+    match /transactions/{transactionId} {
+      allow get: if isValidId(transactionId);
+      allow list: if true;
+      allow create: if isValidId(transactionId) && isValidTransaction(request.resource.data);
+      allow update, delete: if isValidId(transactionId);
+    }
+
+    // Purchase Orders collection for multi-device sync & WhatsApp restock
+    match /purchase_orders/{poId} {
+      allow get: if isValidId(poId);
+      allow list: if true;
+      allow create, update: if isValidId(poId) && isValidPO(request.resource.data);
+      allow delete: if isValidId(poId);
+    }
+
+    // Surat Jalan delivery notes archive (weight, qty, photos - does not affect stock)
+    match /surat_jalan/{suratJalanId} {
+      allow get: if isValidId(suratJalanId);
+      allow list: if true;
+      allow create, update: if isValidId(suratJalanId) && isValidSuratJalan(request.resource.data);
+      allow delete: if isValidId(suratJalanId);
+    }
+
+    // Store settings / sync metadata
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId);
+      allow list: if true;
+      allow write: if isValidId(settingId);
+    }
+  }
+}
